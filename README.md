@@ -78,3 +78,6 @@ npm run dev:h5
 ├── tsconfig.json              # typescript 配置
 └── vite.config.ts             # vite 配置
 ```
+——————————————————————————————new——————————————————————————————————————————
+1、uni.showToast(OBJECT)：显示消息提示框
+  - src\utils\http.ts
