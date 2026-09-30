@@ -92,3 +92,7 @@ npm run dev:h5
   - src\pages\index\components\CustomNavbar.vue
   - 参数：
     - safeAreaInsets:在竖屏正方向下的安全区域插入位置。
+
+5、navigator：页面跳转
+  - src\components\XtxSwiper.vue
+  - 该组件类似HTML中的<a>组件，但只能跳转本地页面。目标页面必须在pages.json中注册。
