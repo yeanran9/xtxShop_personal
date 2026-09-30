@@ -81,3 +81,14 @@ npm run dev:h5
 ——————————————————————————————new——————————————————————————————————————————
 1、uni.showToast(OBJECT)：显示消息提示框
   - src\utils\http.ts
+
+2、navigationBarTextStyle：导航栏标题颜色及状态栏前景颜色，仅支持 black/white
+  - src\pages.json
+
+3、navigationStyle：导航栏样式，仅支持 default/custom。custom 即取消默认的原生导航栏
+  - src\pages.json
+
+4、uni.getSystemInfoSync()：获取系统信息的同步接口。
+  - src\pages\index\components\CustomNavbar.vue
+  - 参数：
+    - safeAreaInsets:在竖屏正方向下的安全区域插入位置。
