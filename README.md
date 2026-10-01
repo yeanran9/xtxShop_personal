@@ -96,3 +96,6 @@ npm run dev:h5
 5、navigator：页面跳转
   - src\components\XtxSwiper.vue
   - 该组件类似HTML中的<a>组件，但只能跳转本地页面。目标页面必须在pages.json中注册。
+
+6、scroll-view：可滚动视图区域。用于区域滚动。
+  - src\pages\index\index.vue
