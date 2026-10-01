@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import type { BannerItem } from '@/types/home'
 import type { SwiperOnChangeEvent } from '@uni-helper/uni-app-types'
 import { ref } from 'vue'
+
+defineProps<{ list: BannerItem[] }>()
 
 const activeIndex = ref(0)
 const onChange = (e: SwiperOnChangeEvent) => {
@@ -11,34 +14,9 @@ const onChange = (e: SwiperOnChangeEvent) => {
 <template>
   <view class="carousel">
     <swiper :autoplay="true" :circular="true" :interval="3000" @change="onChange">
-      <swiper-item>
+      <swiper-item v-for="item in list" :key="item.id">
         <navigator class="navigator" url="/pages/index/index" hover-class="none">
-          <image
-            class="image"
-            mode="aspectFill"
-            src="https://pcapi-xiaotuxian-front-devtest.itheima.net/miniapp/uploads/slider_1.jpg"
-          >
-          </image>
-        </navigator>
-      </swiper-item>
-      <swiper-item>
-        <navigator class="navigator" url="/pages/index/index" hover-class="none">
-          <image
-            class="image"
-            mode="aspectFill"
-            src="https://pcapi-xiaotuxian-front-devtest.itheima.net/miniapp/uploads/slider_2.jpg"
-          >
-          </image>
-        </navigator>
-      </swiper-item>
-      <swiper-item>
-        <navigator class="navigator" url="/pages/index/index" hover-class="none">
-          <image
-            class="image"
-            mode="aspectFill"
-            src="https://pcapi-xiaotuxian-front-devtest.itheima.net/miniapp/uploads/slider_3.jpg"
-          >
-          </image>
+          <image class="image" mode="aspectFill" :src="item.imgUrl"> </image>
         </navigator>
       </swiper-item>
     </swiper>
@@ -46,8 +24,8 @@ const onChange = (e: SwiperOnChangeEvent) => {
     <view class="indicator">
       <text
         class="dot"
-        v-for="(item, index) in 3"
-        :key="item"
+        v-for="(item, index) in list"
+        :key="item.id"
         :class="{ active: index === activeIndex }"
       >
       </text>
