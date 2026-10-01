@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import CustomNavbar from '@/pages/index/components/CustomNavbar.vue'
-import CategoryPanel from '@pages/index/components/CategoryPanel.vue'
-import { getHomeBannerAPI } from '@/services/home'
-import type { BannerItem } from '@/types/home'
+import CategoryPanel from '@/pages/index/components/CategoryPanel.vue'
+import { getHomeBannerAPI, getHomeCategoryAPI } from '@/services/home'
+import type { BannerItem, CategoryItem } from '@/types/home'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 
@@ -12,13 +12,22 @@ const getHomeBanner = async () => {
   bannerList.value = res.result
 }
 
-onLoad(() => getHomeBanner())
+const categoryList = ref<CategoryItem[]>([])
+const getHomeCategory = async () => {
+  const res = await getHomeCategoryAPI()
+  categoryList.value = res.result
+  console.log(categoryList)
+}
+
+onLoad(() => {
+  getHomeBanner(), getHomeCategory()
+})
 </script>
 
 <template>
   <custom-navbar></custom-navbar>
   <XtxSwiper :list="bannerList"></XtxSwiper>
-  <CategoryPanel></CategoryPanel>
+  <CategoryPanel :list="categoryList"></CategoryPanel>
   <view class="index">index</view>
 </template>
 
