@@ -1,13 +1,33 @@
 <script setup lang="ts">
 import { getHomeGuessLikeAPI } from '@/services/home'
+import type { PageParams } from '@/types/global'
 import type { GuessItem } from '@/types/home'
 import { onMounted, ref } from 'vue'
 
+const pageParams: Required<PageParams> = {
+  page: 1,
+  pageSize: 10,
+}
+
+// 标志有无数据待加载 true有，false无
+const isLoad = ref(true)
 const guessList = ref<GuessItem[]>([])
 const getHomeGuessLike = async () => {
-  const res = await getHomeGuessLikeAPI()
+  if (!isLoad.value) {
+    return uni.showToast({
+      icon: 'none',
+      title: '没有更多数据了~喵',
+    })
+  }
+  const res = await getHomeGuessLikeAPI(pageParams)
   // console.log(res,1)
-  guessList.value = res.result.items
+  guessList.value = [...guessList.value, ...res.result.items]
+  // 当前页数小于总页数
+  if (pageParams.page < res.result.pages) {
+    pageParams.page++
+  } else {
+    isLoad.value = false
+  }
 }
 
 onMounted(() => getHomeGuessLike())
@@ -32,7 +52,7 @@ defineExpose({
       </view>
     </navigator>
   </view>
-  <view class="loading-text">正在加载...</view>
+  <view class="loading-text">{{ isLoad ? '正在加载中。。。喵' : '没有更多数据了~喵' }}</view>
 </template>
 
 <style lang="scss">
