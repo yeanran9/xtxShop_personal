@@ -6,6 +6,7 @@ import { getHomeBannerAPI, getHomeCategoryAPI, getHomeHotAPI } from '@/services/
 import type { BannerItem, CategoryItem, HotItem } from '@/types/home'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
+import type { XtxGuessInstance } from '@/types/component'
 // 请求轮播图数据
 const bannerList = ref<BannerItem[]>([])
 const getHomeBanner = async () => {
@@ -29,15 +30,23 @@ const getHomeHot = async () => {
 onLoad(() => {
   getHomeBanner(), getHomeCategory(), getHomeHot()
 })
+
+// 获取猜你喜欢组件实例
+const guessRef = ref<XtxGuessInstance>()
+// 滚动触底事件
+const onScrolltolower = () => {
+  // console.log("到底了~")
+  guessRef.value?.getMore()
+}
 </script>
 
 <template>
   <custom-navbar></custom-navbar>
-  <scroll-view scroll-y class="scroll-view">
+  <scroll-view scroll-y class="scroll-view" @scrolltolower="onScrolltolower">
     <XtxSwiper :list="bannerList"></XtxSwiper>
     <CategoryPanel :list="categoryList"></CategoryPanel>
     <HotPanel :list="hotList"></HotPanel>
-    <XtxGuess></XtxGuess>
+    <XtxGuess ref="guessRef"></XtxGuess>
   </scroll-view>
 </template>
 
