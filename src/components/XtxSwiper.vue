@@ -13,7 +13,7 @@ const onChange = (e: SwiperOnChangeEvent) => {
 
 <template>
   <view class="carousel">
-    <swiper :autoplay="true" :circular="true" :interval="3000" @change="onChange">
+    <swiper :circular="true" :interval="3000" @change="onChange">
       <swiper-item v-for="item in list" :key="item.id">
         <navigator class="navigator" url="/pages/index/index" hover-class="none">
           <image class="image" mode="aspectFill" :src="item.imgUrl"> </image>
