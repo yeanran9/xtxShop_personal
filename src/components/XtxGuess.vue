@@ -27,13 +27,21 @@ const getHomeGuessLike = async () => {
     pageParams.page++
   } else {
     isLoad.value = false
+    isLoad.value = true
   }
+}
+
+//重置猜你喜欢数据
+const resetGuessData = () => {
+  pageParams.page = 1
+  guessList.value = []
 }
 
 onMounted(() => getHomeGuessLike())
 
 defineExpose({
   getMore: getHomeGuessLike,
+  resetGuessData,
 })
 </script>
 

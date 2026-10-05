@@ -43,7 +43,8 @@ const onScrolltolower = () => {
 const isTriggered = ref(false) // 下拉刷新状态 true开启false关闭
 const onRefresherrefresh = async () => {
   isTriggered.value = true
-  await Promise.all([getHomeBanner(), getHomeCategory(), getHomeHot()])
+  guessRef.value?.resetGuessData()
+  await Promise.all([getHomeBanner(), getHomeCategory(), getHomeHot(), guessRef.value?.getMore()])
   isTriggered.value = false
 }
 </script>
