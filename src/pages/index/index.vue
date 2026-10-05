@@ -7,6 +7,7 @@ import type { BannerItem, CategoryItem, HotItem } from '@/types/home'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 import type { XtxGuessInstance } from '@/types/component'
+import PageSkeleton from './components/PageSkeleton.vue'
 // 请求轮播图数据
 const bannerList = ref<BannerItem[]>([])
 const getHomeBanner = async () => {
@@ -27,8 +28,12 @@ const getHomeHot = async () => {
   hotList.value = res.result
 }
 
+// 标志着数据是否加载完毕，若true则加载完成，若false则未加载完成此时先用骨架屏代替
+const isFinishLoading = ref(false)
 onLoad(() => {
-  getHomeBanner(), getHomeCategory(), getHomeHot()
+  isFinishLoading.value = false
+  Promise.all([getHomeBanner(), getHomeCategory(), getHomeHot()])
+  isFinishLoading.value = true
 })
 
 // 获取猜你喜欢组件实例
@@ -59,10 +64,13 @@ const onRefresherrefresh = async () => {
     :refresher-triggered="isTriggered"
     @refresherrefresh="onRefresherrefresh"
   >
-    <XtxSwiper :list="bannerList"></XtxSwiper>
-    <CategoryPanel :list="categoryList"></CategoryPanel>
-    <HotPanel :list="hotList"></HotPanel>
-    <XtxGuess ref="guessRef"></XtxGuess>
+    <PageSkeleton v-if="!isFinishLoading"></PageSkeleton>
+    <template v-else>
+      <XtxSwiper :list="bannerList"></XtxSwiper>
+      <CategoryPanel :list="categoryList"></CategoryPanel>
+      <HotPanel :list="hotList"></HotPanel>
+      <XtxGuess ref="guessRef"></XtxGuess>
+    </template>
   </scroll-view>
 </template>
 

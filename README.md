@@ -99,3 +99,5 @@ npm run dev:h5
 
 6、scroll-view：可滚动视图区域。用于区域滚动。
   - src\pages\index\index.vue
+
+7、axios使用GET、HEAD、DELETE 通常不带请求体data而是params,而uni-request只能用data(例：若使用get则会将参数拼接到URL里)
