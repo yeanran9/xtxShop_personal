@@ -22,9 +22,11 @@ const activeIndex = ref(0)
 // 推荐封面图
 const bannerPicture = ref('')
 // 推荐选项
-const subTypes = ref<subTypeItem[]>([])
+const subTypes = ref<(subTypeItem & { finish?: boolean })[]>([])
 const getHotRecommend = async () => {
-  const res = await getHotRecommendAPI(currUrlMap!.url)
+  const res = await getHotRecommendAPI(currUrlMap!.url, {
+    page: 32,
+  })
   // console.log(res)
   bannerPicture.value = res.result.bannerPicture
   subTypes.value = res.result.subTypes
@@ -33,6 +35,29 @@ const getHotRecommend = async () => {
 onLoad(() => {
   getHotRecommend()
 })
+
+const onScrolltolower = async () => {
+  // 获取当前选项
+  const currSubTypes = subTypes.value[activeIndex.value]
+  // 当前页数是否小于总页数
+  if (currSubTypes.goodsItems.page < currSubTypes.goodsItems.pages) {
+    // 当前选项页数累加
+    currSubTypes.goodsItems.page++
+  } else {
+    currSubTypes.finish = true
+    return uni.showToast({ icon: 'none', title: '没有更多数据了~' })
+  }
+  // 调用并传参
+  const res = await getHotRecommendAPI(currUrlMap!.url, {
+    subType: currSubTypes.id,
+    pageSize: currSubTypes.goodsItems.pageSize,
+    page: currSubTypes.goodsItems.page,
+  })
+  // 提取新数据
+  const newSubTypes = res.result.subTypes[activeIndex.value]
+  // 当前选项商品数组追加
+  currSubTypes.goodsItems.items.push(...newSubTypes.goodsItems.items)
+}
 </script>
 
 <template>
@@ -60,6 +85,7 @@ onLoad(() => {
       v-for="(item, index) in subTypes"
       :key="item.id"
       v-show="activeIndex === index"
+      @scrolltolower="onScrolltolower"
     >
       <view class="goods">
         <navigator
@@ -77,7 +103,9 @@ onLoad(() => {
           </view>
         </navigator>
       </view>
-      <view class="loading-text">正在加载中。。。喵</view>
+      <view class="loading-text">{{
+        item.finish ? '没有更多数据了~喵' : '正在加载中。。。喵'
+      }}</view>
     </scroll-view>
   </view>
 </template>
