@@ -106,3 +106,5 @@ npm run dev:h5
 
 9、web页面事件到uni-app页面事件的变化
   - ![alt text](image.png)
+
+11、uni.previewImage(OBJECT)：预览图片。
