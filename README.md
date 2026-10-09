@@ -103,8 +103,13 @@ npm run dev:h5
 7、axios使用GET、HEAD、DELETE 通常不带请求体data而是params,而uni-request只能用data(例：若使用get则会将参数拼接到URL里)
 
 8、uni.setNavigationBarTitle(OBJECT):动态设置当前页面的标题。
+  - src\pages\hot\hot.vue
 
 9、web页面事件到uni-app页面事件的变化
   - ![alt text](image.png)
 
 11、uni.previewImage(OBJECT)：预览图片。
+  - src\pages\goods\goods.vue
+
+12、uni-popup：弹出层组件，在应用中弹出一个消息提示窗口、提示框等
+  - src\pages\goods\goods.vue
