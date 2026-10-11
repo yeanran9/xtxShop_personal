@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import XtxGuess from '@/components/XtxGuess.vue'
+import { useGuessList } from '@/composables'
 import { useMemberStore } from '@/stores'
 
 // 获取屏幕边界到安全区域距离
@@ -11,23 +12,25 @@ const orderTypes = [
   { type: 3, text: '待收货', icon: 'icon-check' },
   { type: 4, text: '待评价', icon: 'icon-comment' },
 ]
-
+// 从Pinia获取用户信息
 const memberStore = useMemberStore()
+
+const { guessRef, onScrolltolower } = useGuessList()
 </script>
 
 <template>
-  <scroll-view class="viewport" scroll-y enable-back-to-top>
+  <scroll-view class="viewport" scroll-y enable-back-to-top @scrolltolower="onScrolltolower">
     <!-- 个人资料 -->
     <view class="profile" :style="{ paddingTop: safeAreaInsets!.top + 'px' }">
       <!-- 情况1：已登录 -->
       <view class="overview" v-if="memberStore.profile">
         <navigator url="/pages/profile/profile" hover-class="none">
-          <image class="avatar" mode="aspectFill" :src="memberStore.profile.avatar"></image>
+          <image class="avatar" mode="aspectFill" :src="memberStore.profile.avatar"> </image>
         </navigator>
         <view class="meta">
-          <view class="nickname">{{
-            memberStore.profile.nickname || memberStore.profile.account
-          }}</view>
+          <view class="nickname">
+            {{ memberStore.profile.nickname || memberStore.profile.account }}</view
+          >
           <navigator class="extra" url="/pagesMember/profile/profile" hover-class="none">
             <text class="update">更新头像昵称</text>
           </navigator>
@@ -54,9 +57,9 @@ const memberStore = useMemberStore()
         </view>
       </view>
       <!-- 设置 -->
-      <naviagtor class="settings" url="/pagesMember/settings/settings" hover-class="none">
+      <navigator class="settings" url="/pagesMember/settings/settings" hover-class="none">
         设置
-      </naviagtor>
+      </navigator>
     </view>
     <!-- 我的订单 -->
     <view class="orders">
@@ -83,7 +86,7 @@ const memberStore = useMemberStore()
     </view>
     <!-- 猜你喜欢 -->
     <view class="guess">
-      <XtxGuess ref="[]"></XtxGuess>
+      <XtxGuess ref="guessRef"></XtxGuess>
     </view>
   </scroll-view>
 </template>

@@ -6,8 +6,8 @@ import { getHomeBannerAPI, getHomeCategoryAPI, getHomeHotAPI } from '@/services/
 import type { BannerItem, CategoryItem, HotItem } from '@/types/home'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
-import type { XtxGuessInstance } from '@/types/component'
 import PageSkeleton from './components/PageSkeleton.vue'
+import { useGuessList } from '@/composables/index.ts'
 // 请求轮播图数据
 const bannerList = ref<BannerItem[]>([])
 const getHomeBanner = async () => {
@@ -36,13 +36,8 @@ onLoad(() => {
   isFinishLoading.value = true
 })
 
-// 获取猜你喜欢组件实例
-const guessRef = ref<XtxGuessInstance>()
-// 滚动触底事件
-const onScrolltolower = () => {
-  // console.log("到底了~")
-  guessRef.value?.getMore()
-}
+//猜你喜欢加载
+const { guessRef, onScrolltolower } = useGuessList()
 
 // 下拉刷新
 const isTriggered = ref(false) // 下拉刷新状态 true开启false关闭
