@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { onLoad } from '@dcloudio/uni-app'
 import { postLoginWxMinAPI, postLoginWxMinSimpleAPI } from '@/services/login'
+import { useMemberStore } from '@/stores'
+import type { LoginResult } from '@/types/member'
 
 /* 第一种登录方式：一键登录需要注册 */
 // 获取 code 登录凭证
@@ -17,15 +19,24 @@ const postLoginWxMin: UniHelper.ButtonOnGetphonenumber = async (ev) => {
   const iv = ev.detail.iv!
   // 登录请求
   const res = await postLoginWxMinAPI({ code, encryptedData, iv })
-  // 成功提示
-  uni.showToast({ icon: 'none', title: '登录成功' })
+  loginSuccess(res.result)
 }
 
 /* 进行模拟登录 */
 const postLoginWxMinSimple = async () => {
   const res = await postLoginWxMinSimpleAPI('18993059872')
+  loginSuccess(res.result)
+}
+
+const loginSuccess = (profile: LoginResult) => {
+  // 保存用户信息到Pinia
+  const memberStore = useMemberStore()
+  memberStore.setProfile(profile)
   // 成功提示
-  uni.showToast({ icon: 'none', title: '登录成功' })
+  uni.showToast({ icon: 'success', title: '登录成功' })
+  setTimeout(() => {
+    uni.switchTab({ url: '/pages/my/my' })
+  }, 500)
 }
 </script>
 
