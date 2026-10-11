@@ -113,3 +113,8 @@ npm run dev:h5
 
 12、uni-popup：弹出层组件，在应用中弹出一个消息提示窗口、提示框等
   - src\pages\goods\goods.vue
+
+13、手机一键登录要获取三个参数
+  - code:登录凭证。wx.login()返回的对象里获取
+  vi:加密算法的初始向量。button的open-type的值为getPhoneNumber时，通过@getphonenumber的回调里的用户信息对象里获取
+  - encryptedData:包括敏感数据在内的完整用户信息的加密数据。同vi获取一样。
