@@ -1,9 +1,28 @@
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import { useMemberStore } from '@/stores'
+
+const memberStore = useMemberStore()
+// 退出登录
+const onLogout = () => {
+  // 模态弹窗
+  uni.showModal({
+    content: '是否退出登录？',
+    success: (res) => {
+      if (res.confirm) {
+        // 清理用户信息
+        memberStore.clearProfile()
+        // 返回上一页
+        uni.navigateBack()
+      }
+    },
+  })
+}
+</script>
 
 <template>
   <view class="viewport">
     <!-- 列表1 -->
-    <view class="list" v-if="true">
+    <view class="list" v-if="memberStore.profile">
       <navigator class="item arrow" url="/pagesMember/address/address" hover-class="none">
         我的收货地址
       </navigator>
@@ -19,8 +38,8 @@
       <navigator class="item arrow" url="/pages/" hover-class="none"> 关于小兔鲜 </navigator>
     </view>
     <!-- 操作按钮 -->
-    <view class="action">
-      <view class="button">退出登录</view>
+    <view class="action" v-if="memberStore.profile">
+      <view class="button" @tap="onLogout">退出登录</view>
     </view>
   </view>
 </template>

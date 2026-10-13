@@ -118,3 +118,8 @@ npm run dev:h5
   - code:登录凭证。wx.login()返回的对象里获取
   vi:加密算法的初始向量。button的open-type的值为getPhoneNumber时，通过@getphonenumber的回调里的用户信息对象里获取
   - encryptedData:包括敏感数据在内的完整用户信息的加密数据。同vi获取一样。
+
+14、uni.showModal(object):显示模态弹窗，可以只有一个确定按钮，也可以同时有确定和取消按钮。
+  - src\pagesMember\settings\settings.vue
+
+15、uni.navigateBack(OBJECT)：关闭当前页面，返回上一页面或多级页面。
