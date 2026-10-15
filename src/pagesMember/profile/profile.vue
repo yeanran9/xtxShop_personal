@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { getMemberProfileAPI } from '@/services/profile'
+import { useMemberStore } from '@/stores'
 import type { ProfileDetail } from '@/types/member'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
@@ -16,6 +17,43 @@ const getMemberProfile = async () => {
 onLoad(() => {
   getMemberProfile()
 })
+
+const memberStore = useMemberStore()
+/* 修改头像 */
+const onAvatarChange = () => {
+  // 调用拍照或者选择图片
+  uni.chooseMedia({
+    // 文件数量
+    count: 1,
+    // 文件类型
+    mediaType: ['image'],
+    success: (res) => {
+      // 本地图片存储路径
+      const { tempFilePath } = res.tempFiles[0]
+      console.log(tempFilePath)
+      // 文件上传
+      uni.uploadFile({
+        url: '/member/profile/avatar',
+        name: 'file',
+        filePath: tempFilePath,
+        success: (res) => {
+          // 判断状态码是否上传成功
+          if (res.statusCode === 200) {
+            // 提取头像
+            const { avatar } = JSON.parse(res.data).result
+            // 当前页面更新头像
+            profile.value!.avatar = avatar
+            // 更新 Store 头像
+            memberStore.profile!.avatar = avatar
+            uni.showToast({ icon: 'success', title: '更新成功' })
+          } else {
+            uni.showToast({ icon: 'error', title: '出现错误' })
+          }
+        },
+      })
+    },
+  })
+}
 </script>
 
 <template>
@@ -27,7 +65,7 @@ onLoad(() => {
       <view class="title">个人信息</view>
     </view>
     <!-- 头像 -->
-    <view class="avatar">
+    <view class="avatar" @tap="onAvatarChange">
       <view class="avatar-content">
         <image class="image" :src="profile?.avatar" mode="aspectFill"></image>
         <text class="text">点击修改头像</text>
