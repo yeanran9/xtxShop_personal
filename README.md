@@ -129,5 +129,7 @@ npm run dev:h5
   - fail方法只有当请求超时，没网络才会报错
   - name字段的值必须跟后端一致
   - 普通请求（uni.request）：平时提交表单或 JSON 数据，使用的是 application/json 或 application/x-www-form-urlencoded 格式，这种格式只适合传输文本。
+  - src\pagesMember\profile\profile.vue
 
 17、uni.chooseMedia(Object object):拍摄或从手机相册中选择图片或视频
+  - src\pagesMember\profile\profile.vue
