@@ -43,7 +43,7 @@ const onAvatarChange = () => {
             const { avatar } = JSON.parse(res.data).result
             // 当前页面更新头像
             profile.value!.avatar = avatar
-            // 更新 Store 头像
+            // 更新 memberStore 头像
             memberStore.profile!.avatar = avatar
             uni.showToast({ icon: 'success', title: '更新成功' })
           } else {
@@ -60,6 +60,8 @@ const onSubmit = async () => {
   const res = await putMemberProfileAPI({
     nickname: profile.value.nickname,
   })
+  // 更新memberStore里的昵称
+  memberStore.profile!.nickname = res.result.nickname
   uni.showToast({ icon: 'success', title: '保存成功' })
 }
 </script>
