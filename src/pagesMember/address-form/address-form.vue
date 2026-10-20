@@ -1,5 +1,10 @@
 <script lang="ts" setup>
-import { postMemberAddressAPI } from '@/services/address'
+import {
+  getMemberAddressByIdAPI,
+  postMemberAddressAPI,
+  putMemberAddressByIdAPI,
+} from '@/services/address'
+import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 
 // 获取页面参数
@@ -21,6 +26,19 @@ const form = ref({
   isDefault: 0, // 默认地址，1为是，0为否
 })
 
+const getMemberAddressById = async () => {
+  if (query.id) {
+    // 发送请求
+    const res = await getMemberAddressByIdAPI(query.id)
+    // 把数据合并到表单中
+    Object.assign(form.value, res.result)
+  }
+}
+
+onLoad(() => {
+  getMemberAddressById()
+})
+
 const onRegionChange: UniHelper.RegionPickerOnChange = (ev) => {
   // 省市区(前端展示)
   form.value.fullLocation = ev.detail.value.join(' ')
@@ -36,10 +54,14 @@ const onSwitchChange: UniHelper.SwitchOnChange = (ev) => {
 }
 
 const onSumbit = async () => {
-  // 新建地址请求
-  const res = await postMemberAddressAPI(form.value)
+  if (query.id) {
+    const res = await putMemberAddressByIdAPI(query.id, form.value)
+  } else {
+    // 新建地址请求
+    const res = await postMemberAddressAPI(form.value)
+  }
   // 成功提示
-  uni.showToast({ icon: 'success', title: '添加成功' })
+  uni.showToast({ icon: 'success', title: query.id ? '修改成功' : '添加成功' })
   // 返回上一页
   setTimeout(() => {
     uni.navigateBack()
@@ -82,7 +104,13 @@ const onSumbit = async () => {
       </view>
       <view class="form-item">
         <label class="label">设为默认地址</label>
-        <switch class="switch" color="#27ba9b" :checked="true" @change="onSwitchChange"> </switch>
+        <switch
+          class="switch"
+          color="#27ba9b"
+          :checked="form.isDefault === 1"
+          @change="onSwitchChange"
+        >
+        </switch>
       </view>
     </form>
   </view>
