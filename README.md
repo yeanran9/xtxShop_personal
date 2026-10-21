@@ -133,3 +133,5 @@ npm run dev:h5
 
 17、uni.chooseMedia(Object object):拍摄或从手机相册中选择图片或视频
   - src\pagesMember\profile\profile.vue
+
+18、uni-swipe-action：通过滑动触发选项的容器
