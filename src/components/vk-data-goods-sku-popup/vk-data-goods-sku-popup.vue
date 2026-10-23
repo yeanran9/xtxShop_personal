@@ -11,7 +11,7 @@
 	<view class="vk-data-goods-sku-popup" :style="{ zIndex: zIndex }" catchtouchmove="true" :class="valueCom && complete ? 'show' : 'none'" @touchmove.stop.prevent="moveHandle" @click.stop="stop">
 	<!-- #endif -->
 	<!-- #ifdef MP-TOUTIAO -->
-	<view class="vk-data-goods-sku-popup" :style="{ zIndex: zIndex }" :class="valueCom && complete ? 'show' : 'none'" @touchmove.stop.prevent="moveHandle" @click.stop="stop">
+	<view class="vk-data-goods-sku-popup" :style="{ zIndex: zIndex }" :class="valueCom && complete ? 'show' : 'none'" @touchmove.stop.prevent="moveHandle" @click.stop="stop"/>
 	<!-- #endif -->
 		<!-- 页面内容开始 -->
 		<view class="mask" @click="close('mask')"></view>

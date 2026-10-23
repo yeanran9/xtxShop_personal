@@ -5,6 +5,7 @@ import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 import AddressPanel from './components/AddressPanel.vue'
 import ServicePanel from './components/ServicePanel.vue'
+import type { SkuPopupLocaldata } from '@/components/vk-data-goods-sku-popup/vk-data-goods-sku-popup.js'
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 // 接收页面参数
@@ -15,6 +16,31 @@ const goods = ref<GoodsResult>()
 const getGoodsById = async () => {
   const res = await getGoodsByIdAPI(query.id)
   goods.value = res.result
+  // sku组件所需格式
+  localdata.value = {
+    _id: res.result.id,
+    name: res.result.name,
+    goods_thumb: res.result.mainPictures[0],
+    spec_list: res.result.specs.map((item) => {
+      return {
+        name: item.name,
+        list: item.values,
+      }
+    }),
+    sku_list: res.result.skus.map((item) => {
+      return {
+        goods_id: res.result.id,
+        goods_name: res.result.name,
+        _id: item.id,
+        image: item.picture,
+        price: item.price,
+        stock: item.inventory,
+        sku_name_arr: item.specs.map((item2) => {
+          return item2.valueName
+        }),
+      }
+    }),
+  }
 }
 
 onLoad(() => {
@@ -45,10 +71,20 @@ const openPopup = (type: typeof popupName.value) => {
   popupName.value = type
   popup.value?.open()
 }
-const close = popup.value?.close
+
+// 是否显示sku组件
+const isShowSku = ref(false)
+// 商品信息
+const localdata = ref({} as SkuPopupLocaldata)
 </script>
 
 <template>
+  <!-- SKU弹窗组件 -->
+  <vk-data-goods-sku-popup
+    v-model="isShowSku"
+    :localdata="localdata"
+    :amount-type="0"
+  ></vk-data-goods-sku-popup>
   <scroll-view class="viewport" scroll-y>
     <!-- 基本信息 -->
     <view class="goods">
@@ -76,7 +112,7 @@ const close = popup.value?.close
       </view>
       <!-- 操作面板 -->
       <view class="action">
-        <view class="item arrow">
+        <view class="item arrow" @tap="isShowSku = true">
           <text class="label">选择</text>
           <text class="text ellipsis">请选择商品规格</text>
         </view>
