@@ -60,7 +60,7 @@ const onTapImage = (url: string) => {
     urls: goods.value!.mainPictures,
   })
 }
-// 弹出层
+// 服务与地址的弹出层
 const popup = ref<{
   open: (type?: UniHelper.UniPopupType) => void
   close: () => void
@@ -76,6 +76,21 @@ const openPopup = (type: typeof popupName.value) => {
 const isShowSku = ref(false)
 // 商品信息
 const localdata = ref({} as SkuPopupLocaldata)
+
+// 按钮模式
+enum SkuMode {
+  Both = 1,
+  Cart = 2,
+  Buy = 3,
+}
+const mode = ref<SkuMode>()
+// 打开sku弹窗修改按钮模式
+const openSkuPopup = (val: SkuMode) => {
+  // 显示sku弹窗
+  isShowSku.value = true
+  // 修改按钮模式
+  mode.value = val
+}
 </script>
 
 <template>
@@ -84,7 +99,11 @@ const localdata = ref({} as SkuPopupLocaldata)
     v-model="isShowSku"
     :localdata="localdata"
     :amount-type="0"
-  ></vk-data-goods-sku-popup>
+    :mode="mode"
+    add-cart-background-color="#FFA868"
+    buy-now-background-color="#27BA9B"
+  >
+  </vk-data-goods-sku-popup>
   <scroll-view class="viewport" scroll-y>
     <!-- 基本信息 -->
     <view class="goods">
@@ -112,7 +131,7 @@ const localdata = ref({} as SkuPopupLocaldata)
       </view>
       <!-- 操作面板 -->
       <view class="action">
-        <view class="item arrow" @tap="isShowSku = true">
+        <view class="item arrow" @tap="openSkuPopup(SkuMode.Both)">
           <text class="label">选择</text>
           <text class="text ellipsis">请选择商品规格</text>
         </view>
@@ -177,8 +196,8 @@ const localdata = ref({} as SkuPopupLocaldata)
       </navigator>
     </view>
     <view class="buttons">
-      <view class="addcart">加入购物车</view>
-      <view class="buynow">立即购买</view>
+      <view class="addcart" @tap="openSkuPopup(SkuMode.Cart)">加入购物车</view>
+      <view class="buynow" @tap="openSkuPopup(SkuMode.Buy)">立即购买</view>
     </view>
   </view>
   <!-- uni-ui 弹出层 -->
