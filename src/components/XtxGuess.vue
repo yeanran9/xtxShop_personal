@@ -27,7 +27,6 @@ const getHomeGuessLike = async () => {
     pageParams.page++
   } else {
     isLoad.value = false
-    isLoad.value = true
   }
 }
 
