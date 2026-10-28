@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import type { InputNumberBoxEvent } from '@/components/vk-data-input-number-box/vk-data-input-number-box'
-import { deleteMemberCartAPI, getMemberCartAPI, putMemberCartBySkuIdAPI } from '@/services/cart'
+import {
+  deleteMemberCartAPI,
+  getMemberCartAPI,
+  putMemberCartBySkuIdAPI,
+  putMemberCartSelectedAPI,
+} from '@/services/cart'
 import { useMemberStore } from '@/stores'
 import type { CartItem } from '@/types/cart'
 import { onShow, onUnload } from '@dcloudio/uni-app'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 // 获取会员信息
 const memberStore = useMemberStore()
@@ -60,13 +65,15 @@ const onChangeCount = (ev: InputNumberBoxEvent) => {
       // 请求完成后清理定时器记录
       delete timers[ev.index]
     }
-  }, 600)
+  }, 700)
 }
 
+// 兜底：页面卸载时强制提交所有未完成更新
 onUnload(() => {
   Object.keys(timers).forEach((skuId) => {
     // 避免触发typescript编译错误
     if (timers[skuId] !== undefined) {
+      // 清理未执行的定时器
       clearTimeout(timers[skuId])
     }
     const item = cartList.value.find((item) => item.skuId === skuId)
@@ -78,6 +85,58 @@ onUnload(() => {
   // 显式清空对象:良好的编程习惯和防御性编程
   Object.keys(timers).forEach((skuId) => delete timers[skuId])
 })
+
+// 修改单个商品的选中状态
+const onChangeSelected = (item: CartItem) => {
+  // 更新前端数据
+  item.selected = !item.selected
+  // 后端数据更新
+  putMemberCartBySkuIdAPI(item.skuId, { selected: item.selected })
+}
+
+// 计算全选状态
+const isSelectedAll = computed(() => {
+  return cartList.value.length && cartList.value.every((item) => item.selected)
+})
+
+// 修改选中状态-全选修改
+const onChangeSelectedAll = () => {
+  // 全选状态取反
+  const _isSelectAll = !isSelectedAll.value
+  // 前端数据更新
+  cartList.value.forEach((item) => {
+    item.selected = _isSelectAll
+  })
+  // 后端数据更新
+  putMemberCartSelectedAPI({ selected: _isSelectAll })
+}
+
+// 计算选中单品列表
+const selectedCartList = computed(() => {
+  return cartList.value.filter((item) => item.selected)
+})
+// 计算选中总件数
+const selectedCartListCount = computed(() => {
+  return selectedCartList.value.reduce((count, item) => count + item.count, 0)
+})
+
+// 计算选中商品金额
+const selectedCartListMoney = computed(() => {
+  return selectedCartList.value
+    .reduce((amount, item) => amount + item.count * item.nowPrice, 0)
+    .toFixed(2)
+})
+
+// 结算按钮
+const onPayment = () => {
+  if (selectedCartList.value.length === 0) {
+    return uni.showToast({
+      icon: 'none',
+      title: '请选择商品',
+    })
+  }
+  //跳转到结算页面
+}
 </script>
 
 <template>
@@ -98,7 +157,11 @@ onUnload(() => {
             <!-- 商品信息 -->
             <view class="goods">
               <!-- 选中状态 -->
-              <text class="checkbox" :class="{ checked: item.selected }"></text>
+              <text
+                class="checkbox"
+                @tap="onChangeSelected(item)"
+                :class="{ checked: item.selected }"
+              ></text>
               <!-- 商品数据 -->
               <navigator
                 class="navigator"
@@ -143,11 +206,17 @@ onUnload(() => {
       </view>
       <!-- 吸底工具栏 -->
       <view class="toolbar">
-        <text class="all" :class="{ checked: true }">全选</text>
+        <text class="all" @tap="onChangeSelectedAll" :class="{ checked: isSelectedAll }">全选</text>
         <text class="text">合计：</text>
-        <text class="amount">100</text>
+        <text class="amount">{{ selectedCartListMoney }}</text>
         <view class="button-grounp">
-          <view class="button payment-button" :class="{ disabled: true }">去结算</view>
+          <view
+            class="button payment-button"
+            :class="{ disabled: selectedCartList.length === 0 }"
+            @tap="onPayment"
+          >
+            去结算({{ selectedCartListCount }})
+          </view>
         </view>
       </view>
     </template>
