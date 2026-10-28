@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { deleteMemberCartAPI, getMemberCartAPI } from '@/services/cart'
+import type { InputNumberBoxEvent } from '@/components/vk-data-input-number-box/vk-data-input-number-box'
+import { deleteMemberCartAPI, getMemberCartAPI, putMemberCartBySkuIdAPI } from '@/services/cart'
 import { useMemberStore } from '@/stores'
 import type { CartItem } from '@/types/cart'
-import { onShow } from '@dcloudio/uni-app'
+import { onShow, onUnload } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 
 // 获取会员信息
@@ -30,6 +31,11 @@ const onDeleteCart = (skuId: string) => {
     success: async (res) => {
       if (res.confirm) {
         await deleteMemberCartAPI({ ids: [skuId] })
+        // 清理删除后的商品的定时器
+        if (timers[skuId] !== undefined) {
+          clearTimeout(timers[skuId])
+          delete timers[skuId]
+        }
       }
       uni.showToast({ icon: 'success', title: '删除成功' })
       // 重新获取列表
@@ -37,6 +43,41 @@ const onDeleteCart = (skuId: string) => {
     },
   })
 }
+
+const timers: { [skuId: string]: number | undefined } = {}
+// 修改商品数量
+const onChangeCount = (ev: InputNumberBoxEvent) => {
+  // 为该商品独立防抖
+  if (timers[ev.index]) {
+    clearTimeout(timers[ev.index])
+  }
+  timers[ev.index] = setTimeout(async () => {
+    try {
+      await putMemberCartBySkuIdAPI(ev.index, { count: ev.value })
+    } catch (error) {
+      console.error('更新购物车失败', error)
+    } finally {
+      // 请求完成后清理定时器记录
+      delete timers[ev.index]
+    }
+  }, 600)
+}
+
+onUnload(() => {
+  Object.keys(timers).forEach((skuId) => {
+    // 避免触发typescript编译错误
+    if (timers[skuId] !== undefined) {
+      clearTimeout(timers[skuId])
+    }
+    const item = cartList.value.find((item) => item.skuId === skuId)
+    // 立即执行一次更新
+    if (item) {
+      putMemberCartBySkuIdAPI(skuId, { count: item.count })
+    }
+  })
+  // 显式清空对象:良好的编程习惯和防御性编程
+  Object.keys(timers).forEach((skuId) => delete timers[skuId])
+})
 </script>
 
 <template>
@@ -73,9 +114,14 @@ const onDeleteCart = (skuId: string) => {
               </navigator>
               <!-- 商品数量 -->
               <view class="count">
-                <text class="text">-</text>
-                <input type="number" class="input" :value="item.count.toString()" />
-                <text class="text">+</text>
+                <vk-data-input-number-box
+                  v-model="item.count"
+                  :min="0"
+                  :max="item.stock"
+                  :index="item.skuId"
+                  @change="onChangeCount"
+                >
+                </vk-data-input-number-box>
               </view>
             </view>
             <!-- 右侧删除按钮 -->
