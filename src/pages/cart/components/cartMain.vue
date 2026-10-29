@@ -140,6 +140,7 @@ const onPayment = () => {
     })
   }
   //跳转到结算页面
+  uni.navigateTo({ url: '/pagesOrder/create/create' })
 }
 
 // 猜你喜欢下拉刷新
