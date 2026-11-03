@@ -127,8 +127,11 @@ const AddressRef = ref()
 const selectedAddressId = computed(() => AddressRef.value?.selectedAddressId)
 
 // 收货地址
-const selectAddText = computed(() => {
-  return goods.value?.userAddresses.find((item) => item.id === selectedAddressId.value)
+const selectAddress = computed(() => {
+  return (
+    goods.value?.userAddresses.find((item) => item.id === selectedAddressId.value) ||
+    goods.value?.userAddresses.find((item) => item.isDefault)
+  )
 })
 
 onShow(() => {
@@ -143,7 +146,7 @@ onShow(() => {
 // 立即购买
 const onBuyNow = (ev: SkuPopupEvent) => {
   uni.navigateTo({
-    url: `/pagesOrder/create/create?skuId=${ev._id}&count=${ev.buy_num}&addressId=${selectedAddressId.value}`,
+    url: `/pagesOrder/create/create?skuId=${ev._id}&count=${ev.buy_num}&addressId=${selectAddress.value?.id}`,
   })
 }
 </script>
@@ -195,8 +198,8 @@ const onBuyNow = (ev: SkuPopupEvent) => {
         </view>
         <view class="item arrow" @tap="openPopup('address')">
           <text class="label">送至</text>
-          <text class="text ellipsis" v-if="selectAddText"
-            >{{ selectAddText?.fullLocation }}{{ selectAddText?.address }}</text
+          <text class="text ellipsis" v-if="selectAddress"
+            >{{ selectAddress?.fullLocation }}{{ selectAddress?.address }}</text
           >
           <text class="text ellipsis" v-else>请选择收货地址</text>
         </view>
