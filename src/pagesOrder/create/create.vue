@@ -1,9 +1,11 @@
 <script lang="ts" setup>
-import { getMemberOrderPreAPI } from '@/services/order'
+import { getMemberOrderPreAPI, getMemberOrderPreNowAPI } from '@/services/order'
 import { useAddressStore } from '@/stores/modules/address'
 import type { OrderPreResult } from '@/types/order'
 import { onLoad } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
+
+const query = defineProps<{ skuId?: string; count?: string; addressId?: string }>()
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
@@ -27,11 +29,28 @@ const onChangeDelivery: UniHelper.SelectorPickerOnChange = (ev) => {
 // 获取数据
 const orderPre = ref<OrderPreResult>()
 const getMemberOrderPre = async () => {
-  const res = await getMemberOrderPreAPI()
-  orderPre.value = res.result
+  // 是否有立即购买参数
+  if (query.skuId && query.count) {
+    // 调用立即购买 API
+    const res = await getMemberOrderPreNowAPI({
+      skuId: query.skuId,
+      count: query.count,
+      addressId: query.addressId,
+    })
+    // 是否有传地址Id
+    if (query.addressId) {
+      addressStore.changeSelectedAddress(res.result.userAddresses[0])
+    }
+    orderPre.value = res.result
+  } else {
+    // 调用预付订单 API
+    const res = await getMemberOrderPreAPI()
+    orderPre.value = res.result
+  }
 }
 
 onLoad(() => {
+  addressStore.clearSelectedAdress()
   getMemberOrderPre()
 })
 

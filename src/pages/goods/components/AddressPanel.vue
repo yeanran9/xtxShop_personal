@@ -1,5 +1,32 @@
 <script setup lang="ts">
+import { getMemberAddressAPI } from '@/services/address'
+import type { AddressItem } from '@/types/address'
+import { onMounted, ref } from 'vue'
+
 const props = defineProps<{ close?: () => void }>()
+
+// y:获取地址列表
+const addressList = ref<AddressItem[]>()
+const getMemberAddress = async () => {
+  const res = await getMemberAddressAPI()
+  addressList.value = res.result
+}
+
+// y:点击地址事件
+const selectedAddressId = ref<string>()
+const onSelectedAddress = (id: string) => {
+  selectedAddressId.value = id
+  props.close?.()
+}
+
+onMounted(() => {
+  getMemberAddress()
+})
+
+defineExpose({
+  getMemberAddress,
+  selectedAddressId,
+})
 </script>
 
 <template>
@@ -10,24 +37,27 @@ const props = defineProps<{ close?: () => void }>()
     <view class="title">配送至</view>
     <!-- 内容 -->
     <view class="content">
-      <view class="item">
-        <view class="user">李明 13824686868</view>
-        <view class="address">北京市顺义区后沙峪地区安平北街6号院</view>
+      <view
+        class="item"
+        v-for="item in addressList"
+        :key="item.id"
+        @tap="onSelectedAddress(item.id)"
+      >
+        <view class="user">{{ item.receiver }} {{ item.contact }}</view>
+        <view class="address">{{ item.fullLocation }}{{ item.address }}</view>
         <text class="icon icon-checked"></text>
-      </view>
-      <view class="item">
-        <view class="user">王东 13824686868</view>
-        <view class="address">北京市顺义区后沙峪地区安平北街6号院</view>
-        <text class="icon icon-ring"></text>
-      </view>
-      <view class="item">
-        <view class="user">张三 13824686868</view>
-        <view class="address">北京市朝阳区孙河安平北街6号院</view>
-        <text class="icon icon-ring"></text>
       </view>
     </view>
     <view class="footer">
-      <view class="bitton primary"> 新建地址 </view>
+      <view class="bitton primary">
+        <navigator
+          url="/pagesMember/address-form/address-form"
+          open-type="navigate"
+          hover-class="none"
+        >
+          新建地址
+        </navigator>
+      </view>
       <view class="button primary" v-if="false">确定</view>
     </view>
   </view>

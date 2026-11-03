@@ -9,5 +9,10 @@ export const useAddressStore = defineStore('address', () => {
     selectedAddress.value = val
   }
 
-  return { selectedAddress, changeSelectedAddress }
+  // 清理store中的地址
+  const clearSelectedAdress = () => {
+    selectedAddress.value = undefined
+  }
+
+  return { selectedAddress, changeSelectedAddress, clearSelectedAdress }
 })

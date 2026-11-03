@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { getGoodsByIdAPI } from '@/services/goods'
 import type { GoodsResult } from '@/types/goods'
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onShow } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 import AddressPanel from './components/AddressPanel.vue'
 import ServicePanel from './components/ServicePanel.vue'
@@ -11,6 +11,7 @@ import type {
   SkuPopupLocaldata,
 } from '@/components/vk-data-goods-sku-popup/vk-data-goods-sku-popup.js'
 import { postMemberCartAPI } from '@/services/cart.ts'
+
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 // 接收页面参数
@@ -51,6 +52,7 @@ const getGoodsById = async () => {
 onLoad(() => {
   getGoodsById()
 })
+
 // 当前轮播图下标
 const currentIndex = ref(0)
 // 轮播图变化时触发事件
@@ -75,6 +77,10 @@ const popupName = ref<'address' | 'service'>()
 const openPopup = (type: typeof popupName.value) => {
   popupName.value = type
   popup.value?.open()
+  // 打开地址弹出层则请求数据
+  if (type === 'address') {
+    AddressRef.value?.getMemberAddress()
+  }
 }
 
 // 是否显示sku组件
@@ -113,6 +119,33 @@ const onAddCart = async (ev: SkuPopupEvent) => {
   // 关闭sku弹窗
   isShowSku.value = false
 }
+
+// y:获取AddressPannel组件实例
+const AddressRef = ref()
+
+// 选中后的地址Id
+const selectedAddressId = computed(() => AddressRef.value?.selectedAddressId)
+
+// 收货地址
+const selectAddText = computed(() => {
+  return goods.value?.userAddresses.find((item) => item.id === selectedAddressId.value)
+})
+
+onShow(() => {
+  AddressRef.value?.getMemberAddress()
+})
+/* 
+错误原因：
+  1、当商品详情页打开后AddressPanel页面未打开时，实例未被创建,未被创建前为undefind
+  2、同理，此时商品详情页
+*/
+
+// 立即购买
+const onBuyNow = (ev: SkuPopupEvent) => {
+  uni.navigateTo({
+    url: `/pagesOrder/create/create?skuId=${ev._id}&count=${ev.buy_num}&addressId=${selectedAddressId.value}`,
+  })
+}
 </script>
 
 <template>
@@ -126,6 +159,7 @@ const onAddCart = async (ev: SkuPopupEvent) => {
     buy-now-background-color="#27BA9B"
     ref="skuPopupRef"
     @add-cart="onAddCart"
+    @buy-now="onBuyNow"
   >
   </vk-data-goods-sku-popup>
   <scroll-view class="viewport" scroll-y>
@@ -161,7 +195,10 @@ const onAddCart = async (ev: SkuPopupEvent) => {
         </view>
         <view class="item arrow" @tap="openPopup('address')">
           <text class="label">送至</text>
-          <text class="text ellipsis">请选择收货地址</text>
+          <text class="text ellipsis" v-if="selectAddText"
+            >{{ selectAddText?.fullLocation }}{{ selectAddText?.address }}</text
+          >
+          <text class="text ellipsis" v-else>请选择收货地址</text>
         </view>
         <view class="item arrow" @tap="openPopup('service')">
           <text class="label">服务</text>
@@ -227,7 +264,11 @@ const onAddCart = async (ev: SkuPopupEvent) => {
   <!-- uni-ui 弹出层 -->
   <uni-popup ref="popup" type="bottom" background-color="#fff">
     <ServicePanel v-if="popupName === 'service'" :close="popup?.close"></ServicePanel>
-    <AddressPanel v-if="popupName === 'address'" :close="popup?.close"></AddressPanel>
+    <AddressPanel
+      ref="AddressRef"
+      v-if="popupName === 'address'"
+      :close="popup?.close"
+    ></AddressPanel>
   </uni-popup>
 </template>
 
