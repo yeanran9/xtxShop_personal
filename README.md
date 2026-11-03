@@ -135,3 +135,8 @@ npm run dev:h5
   - src\pagesMember\profile\profile.vue
 
 18、uni-swipe-action：通过滑动触发选项的容器
+
+19、this.animate(selector, keyframes, duration, ScrollTimeline)：滚动驱动动画
+  - selector:选择器 keyframes:关键帧信息集合 duration: 动画时长 ScrollTimeline: 滚动时间轴
+  - 只应用于微信小程序
+  - src\pagesOrder\detail\detail.vue
