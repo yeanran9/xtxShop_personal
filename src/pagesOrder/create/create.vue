@@ -1,11 +1,21 @@
 <script lang="ts" setup>
-import { getMemberOrderPreAPI, getMemberOrderPreNowAPI, postMemberOrderAPI } from '@/services/order'
+import {
+  getMemberOrderPreAPI,
+  getMemberOrderPreNowAPI,
+  getMemberOrderRepurchaseByIdAPI,
+  postMemberOrderAPI,
+} from '@/services/order'
 import { useAddressStore } from '@/stores/modules/address'
 import type { OrderPreResult } from '@/types/order'
 import { onLoad } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 
-const query = defineProps<{ skuId?: string; count?: string; addressId?: string }>()
+const query = defineProps<{
+  skuId?: string
+  count?: string
+  addressId?: string
+  orderId?: string
+}>()
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
@@ -41,6 +51,9 @@ const getMemberOrderPre = async () => {
     if (query.addressId) {
       addressStore.changeSelectedAddress(res.result.userAddresses[0])
     }
+    orderPre.value = res.result
+  } else if (query.orderId) {
+    const res = await getMemberOrderRepurchaseByIdAPI(query.orderId)
     orderPre.value = res.result
   } else {
     // 调用预付订单 API
