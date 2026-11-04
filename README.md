@@ -140,3 +140,6 @@ npm run dev:h5
   - selector:选择器 keyframes:关键帧信息集合 duration: 动画时长 ScrollTimeline: 滚动时间轴
   - 只应用于微信小程序
   - src\pagesOrder\detail\detail.vue
+
+20、uni-countdown:倒计时组件
+  - src\pagesOrder\detail\detail.vue

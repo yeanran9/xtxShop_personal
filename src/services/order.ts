@@ -1,4 +1,9 @@
-import type { OrderCreateParams, OrderCreateResult, OrderPreResult } from '@/types/order'
+import type {
+  OrderCreateParams,
+  OrderCreateResult,
+  OrderPreResult,
+  OrderResult,
+} from '@/types/order'
 import { http } from '@/utils/http'
 /**
  * 填写订单-获取预付订单
@@ -33,5 +38,16 @@ export const postMemberOrderAPI = (data: OrderCreateParams) => {
     url: '/member/order',
     method: 'POST',
     data,
+  })
+}
+
+/**
+ * 获取订单详情
+ * @param id 订单id
+ */
+export const getMemberOrderByIdAPI = (id: string) => {
+  return http<OrderResult>({
+    url: `/member/order/${id}`,
+    method: 'GET',
   })
 }

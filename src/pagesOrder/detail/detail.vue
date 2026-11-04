@@ -1,7 +1,10 @@
 <script lang="ts" setup>
 import XtxGuess from '@/components/XtxGuess.vue'
 import { useGuessList } from '@/composables'
-import { onReady } from '@dcloudio/uni-app'
+import { OrderState, orderStateList } from '@/services/constants'
+import { getMemberOrderByIdAPI } from '@/services/order'
+import type { OrderResult } from '@/types/order'
+import { onLoad, onReady } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 
 // 获取页面参数
@@ -72,6 +75,24 @@ onReady(() => {
     endScrollOffset: 50,
   })
 })
+
+// 获取订单详情
+// 获取订单详情
+const order = ref<OrderResult>()
+const getMemberOrderById = async () => {
+  const res = await getMemberOrderByIdAPI(query.id)
+  order.value = res.result
+}
+
+onLoad(() => {
+  getMemberOrderById()
+})
+
+// 待付款倒计时结束事件
+const onTimeup = () => {
+  // 修改订单状态为已取消
+  order.value!.orderState = OrderState.YiQuXiao
+}
 </script>
 
 <template>
@@ -87,24 +108,33 @@ onReady(() => {
   </view>
 
   <!-- 滚动页面 -->
-  <scroll-view id="scroller" class="viewport" scroll-y>
+  <scroll-view id="scroller" class="viewport" scroll-y @scrolltolower="onScrolltolower">
     <!-- 订单信息加载完成 -->
-    <template v-if="true">
+    <template v-if="order">
       <!-- 订单状态 -->
       <view class="overview" :style="{ paddingTop: safeAreaInsets!.top + 20 + 'px' }">
         <!-- 待付款状态:展示去支付按钮和倒计时 -->
-        <template v-if="true">
+        <template v-if="order.orderState === OrderState.DaiFuKuan">
           <view class="status icon-clock">等待付款</view>
           <view class="tips">
             <text class="money">应付金额：&yen; 99.00</text>
-            <text class="time">支付剩余</text>00 时 29 分 59 秒
+            <text class="time">支付剩余</text>
+            <!-- 倒计时组件 -->
+            <uni-countdown
+              color="#fff"
+              splitor-color="#fff"
+              :show-day="false"
+              :show-colon="false"
+              :second="order?.countdown"
+              @timeup="onTimeup"
+            />
           </view>
           <view class="button">去支付</view>
         </template>
         <!-- 其他订单状态:展示再次购买按钮 -->
         <template v-else>
           <!-- 订单状态文字 -->
-          <view class="status">待付款</view>
+          <view class="status">{{ orderStateList[order.orderState].text }}</view>
           <view class="button-group">
             <navigator :url="`/pagesOrder/create/create?orderId=${query.id}`" hover-class="none">
               再次购买
@@ -192,7 +222,7 @@ onReady(() => {
       </view>
 
       <!-- 猜你喜欢 -->
-      <xtx-guess ref="guessRef"></xtx-guess>
+      <XtxGuess ref="guessRef"></XtxGuess>
 
       <!-- 底部操作栏 -->
       <view class="toolbar-height" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }">

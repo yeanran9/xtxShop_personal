@@ -67,3 +67,79 @@ export type OrderCreateResult = {
   /** 订单Id */
   id: string
 }
+
+/** 订单详情 返回信息 */
+export type OrderResult = {
+  /** 订单编号 */
+  id: string
+  /** 订单状态，1为待付款、2为待发货、3为待收货、4为待评价、5为已完成、6为已取消 */
+  orderState: number
+  /** 最晚支付时间 */
+  payLatestTime: number
+  /** 应付金额 */
+  payMoney: number
+  /** 支付状态 */
+  payState?: number
+  /** 支付类型 */
+  payType: number
+  /** 运费 */
+  postFee: number
+  /** 省份代码 */
+  provinceCode: string
+  /** 收货人完整地址 */
+  receiverAddress: string
+  /** 收货人 */
+  reciverContact: string
+  /** 收货人手机 */
+  receiverMobile: string
+  /** 商品总价 */
+  totalMoney: number
+  /** 商品总数 */
+  totalNum: number
+  /** 商品集合 [ 商品信息 ] */
+  skus: OrderSkuItem[]
+  /* 预计到达时间 */
+  arrivalEstimatedTime?: string
+  /** 城市代码 */
+  cityCode: string
+  /** 关闭时间 */
+  closeTime?: string
+  /* 交付时间 */
+  consignTime?: string
+  /** 倒计时--剩余的秒数 -1 表示已经超时，正数表示倒计时未结束 */
+  countdown: number
+  /** 国家代码 */
+  countyCode: string
+  /** 下单时间 */
+  createTime: string
+  /** 发货时间类型 */
+  deliveryTimeType: number
+  /** 结束时间 */
+  endTime?: string
+  /** 评价时间 */
+  evaluationTime?: string
+}
+
+/** 商品信息 */
+export type OrderSkuItem = {
+  /** sku id */
+  id: string
+  /** 图片地址 */
+  image: string
+  /** 商品名称 */
+  name: string
+  /** 商品属性文字 */
+  attrsText: string
+  /** 购买时单价 */
+  curPrice: number
+  /** 数量 */
+  quantity: number
+  /** 实际支付金额 */
+  realPay: number
+  /** 商品 id */
+  spuId: string
+  /** 总价 */
+  totalMoney?: number
+  /** 商品属性集合 */
+  properties: { propertyMainName: string; propertyValueName: string }[]
+}
