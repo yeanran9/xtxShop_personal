@@ -2,7 +2,7 @@
 import XtxGuess from '@/components/XtxGuess.vue'
 import { useGuessList } from '@/composables'
 import { OrderState, orderStateList } from '@/services/constants'
-import { getMemberOrderByIdAPI } from '@/services/order'
+import { getMemberOrderByIdAPI, getMemberOrderConsignmentByIdAPI } from '@/services/order'
 import { getPayMockAPI, getPayWxPayMiniPayAPI } from '@/services/pay'
 import type { OrderResult } from '@/types/order'
 import { onLoad, onReady } from '@dcloudio/uni-app'
@@ -78,7 +78,6 @@ onReady(() => {
 })
 
 // 获取订单详情
-// 获取订单详情
 const order = ref<OrderResult>()
 const getMemberOrderById = async () => {
   const res = await getMemberOrderByIdAPI(query.id)
@@ -108,6 +107,19 @@ const onOrderPay = async () => {
   }
   // 关闭当前页，再跳转支付结果页
   uni.redirectTo({ url: `/pagesOrder/payment/payment?id=${query.id}` })
+}
+
+// 是否为开发环境
+const isDev = import.meta.env.DEV
+// 模拟发货
+const onOrderSend = async () => {
+  if (isDev) {
+    //当在项目打包时该代码会根据是否为开发环境而选择是否进行编译
+    await getMemberOrderConsignmentByIdAPI(query.id)
+    uni.showToast({ icon: 'success', title: '模拟发货完成' })
+    // 主动更新订单状态
+    order.value!.orderState = OrderState.DaiShouHuo
+  }
 }
 </script>
 
@@ -160,7 +172,7 @@ const onOrderPay = async () => {
               再次购买
             </navigator>
             <!-- 待发货状态：模拟发货，开发期间使用，用于修改订单状态为已发货 -->
-            <view class="button" v-if="false">模拟发货</view>
+            <view class="button" v-if="isDev" @tap="onOrderSend">模拟发货</view>
           </view>
         </template>
       </view>
@@ -204,14 +216,7 @@ const onOrderPay = async () => {
             </view>
           </navigator>
           <!-- 待评价状态：展示按钮 -->
-          <view
-            class="action"
-            v-if="
-              order?.orderState === OrderState.YiWanCheng ||
-              order?.orderState === OrderState.DaiShouHuo ||
-              order?.orderState === OrderState.DaiPingJia
-            "
-          >
+          <view class="action" v-if="order?.orderState === OrderState.DaiPingJia">
             <view class="button primary">申请售后</view>
             <navigator url="" class="button"> 去评价 </navigator>
           </view>
@@ -265,11 +270,22 @@ const onOrderPay = async () => {
             再次购买
           </navigator>
           <!-- 待收货状态：展示确认收货 -->
-          <view class="button primary">确认收货</view>
+          <view class="button primary" v-if="order?.orderState === OrderState.DaiShouHuo">
+            确认收货
+          </view>
           <!-- 待评价状态：展示去评价 -->
-          <view class="button">去评价</view>
+          <view class="button" v-if="order?.orderState === OrderState.DaiPingJia"> 去评价 </view>
           <!-- 待评价/已完成/已取消 状态: 展示删除订单 -->
-          <view class="button delete"> 删除订单 </view>
+          <view
+            class="button delete"
+            v-if="
+              order?.orderState === OrderState.DaiPingJia ||
+              order?.orderState === OrderState.YiWanCheng ||
+              order?.orderState === OrderState.YiQuXiao
+            "
+          >
+            删除订单
+          </view>
         </template>
       </view>
     </template>
