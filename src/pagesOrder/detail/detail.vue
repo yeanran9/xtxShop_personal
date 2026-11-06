@@ -5,10 +5,11 @@ import { OrderState, orderStateList } from '@/services/constants'
 import {
   getMemberOrderByIdAPI,
   getMemberOrderConsignmentByIdAPI,
+  getMemberOrderLogisticsByIdAPI,
   putMemberOrderReceiptByIdAPI,
 } from '@/services/order'
 import { getPayMockAPI, getPayWxPayMiniPayAPI } from '@/services/pay'
-import type { OrderResult } from '@/types/order'
+import type { LogisticItem, OrderResult } from '@/types/order'
 import { onLoad, onReady } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 
@@ -86,6 +87,21 @@ const order = ref<OrderResult>()
 const getMemberOrderById = async () => {
   const res = await getMemberOrderByIdAPI(query.id)
   order.value = res.result
+  // 仅在订单状态为待收货、待评价、已完成时可获取物流信息
+  if (
+    [OrderState.DaiShouHuo, OrderState.DaiPingJia, OrderState.YiWanCheng].includes(
+      order.value.orderState,
+    )
+  ) {
+    getMemberOrderLogisticsById()
+  }
+}
+
+// 获取物流信息
+const logisticList = ref<LogisticItem[]>([])
+const getMemberOrderLogisticsById = async () => {
+  const res = await getMemberOrderLogisticsByIdAPI(query.id)
+  logisticList.value = res.result.list
 }
 
 onLoad(() => {
@@ -198,11 +214,9 @@ const onOrderConfirm = () => {
       <!-- 配送状态 -->
       <view class="shipment">
         <!-- 订单物流信息 -->
-        <view class="item" v-for="item in 2" :key="item">
-          <view class="message">
-            您已在广州市天河区黑马程序员完成取件，感谢使用菜鸟驿站，期待再次为您服务。
-          </view>
-          <view class="date"> 2023-04-14 13:14:20 </view>
+        <view class="item" v-for="item in logisticList" :key="item.id">
+          <view class="message">{{ item.text }}</view>
+          <view class="date"> {{ item.time }} </view>
         </view>
         <!-- 用户收货地址 -->
         <view class="locate">
@@ -299,14 +313,7 @@ const onOrderConfirm = () => {
           <!-- 待评价状态：展示去评价 -->
           <view class="button" v-if="order?.orderState === OrderState.DaiPingJia"> 去评价 </view>
           <!-- 待评价/已完成/已取消 状态: 展示删除订单 -->
-          <view
-            class="button delete"
-            v-if="
-              order?.orderState === OrderState.DaiPingJia ||
-              order?.orderState === OrderState.YiWanCheng ||
-              order?.orderState === OrderState.YiQuXiao
-            "
-          >
+          <view class="button delete" v-if="order?.orderState >= OrderState.DaiPingJia">
             删除订单
           </view>
         </template>
