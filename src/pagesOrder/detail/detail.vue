@@ -2,7 +2,11 @@
 import XtxGuess from '@/components/XtxGuess.vue'
 import { useGuessList } from '@/composables'
 import { OrderState, orderStateList } from '@/services/constants'
-import { getMemberOrderByIdAPI, getMemberOrderConsignmentByIdAPI } from '@/services/order'
+import {
+  getMemberOrderByIdAPI,
+  getMemberOrderConsignmentByIdAPI,
+  putMemberOrderReceiptByIdAPI,
+} from '@/services/order'
 import { getPayMockAPI, getPayWxPayMiniPayAPI } from '@/services/pay'
 import type { OrderResult } from '@/types/order'
 import { onLoad, onReady } from '@dcloudio/uni-app'
@@ -120,6 +124,21 @@ const onOrderSend = async () => {
     // 主动更新订单状态
     order.value!.orderState = OrderState.DaiShouHuo
   }
+}
+
+// 确认收货
+const onOrderConfirm = () => {
+  // 二次确认弹窗
+  uni.showModal({
+    content: '为保障您的权益，请收到货并确认无误后，再确认收货',
+    success: async (res) => {
+      if (res.confirm) {
+        const res = await putMemberOrderReceiptByIdAPI(query.id)
+        // 更新订单状态
+        order.value = res.result
+      }
+    },
+  })
 }
 </script>
 
@@ -270,7 +289,11 @@ const onOrderSend = async () => {
             再次购买
           </navigator>
           <!-- 待收货状态：展示确认收货 -->
-          <view class="button primary" v-if="order?.orderState === OrderState.DaiShouHuo">
+          <view
+            class="button primary"
+            @tap="onOrderConfirm"
+            v-if="order?.orderState === OrderState.DaiShouHuo"
+          >
             确认收货
           </view>
           <!-- 待评价状态：展示去评价 -->
