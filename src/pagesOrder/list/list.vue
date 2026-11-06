@@ -15,7 +15,7 @@ const orderTabs = ref([
   { orderState: 4, title: '待评价' },
 ])
 
-const activeIndex = ref(0)
+const activeIndex = ref(orderTabs.value.findIndex((item) => item.orderState === Number(query.type)))
 </script>
 
 <template>

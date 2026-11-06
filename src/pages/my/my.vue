@@ -75,7 +75,7 @@ const { guessRef, onScrolltolower } = useGuessList()
           v-for="item in orderTypes"
           :key="item.type"
           :class="item.icon"
-          url="/pagesOrder/list/list?type=${item.type}"
+          :url="`/pagesOrder/list/list?type=${item.type}`"
           hover-class="none"
         >
           {{ item.text }}
