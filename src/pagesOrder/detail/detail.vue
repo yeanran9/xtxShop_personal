@@ -3,7 +3,9 @@ import XtxGuess from '@/components/XtxGuess.vue'
 import { useGuessList } from '@/composables'
 import { OrderState, orderStateList } from '@/services/constants'
 import {
+  deleteMemberOrderAPI,
   getMemberOrderByIdAPI,
+  getMemberOrderCancelByIdAPI,
   getMemberOrderConsignmentByIdAPI,
   getMemberOrderLogisticsByIdAPI,
   putMemberOrderReceiptByIdAPI,
@@ -36,6 +38,21 @@ const reasonList = ref([
 ])
 // 订单取消原因
 const reason = ref('')
+// 取消订单
+const onOrderCancel = () => {
+  // 二次确认弹窗
+  uni.showModal({
+    content: '您确定取消该订单？',
+    success: async (res) => {
+      if (res.confirm) {
+        const newOrder = await getMemberOrderCancelByIdAPI(query.id, { cancelReason: reason.value })
+        order.value = newOrder.result
+        popup.value?.close?.()
+      }
+    },
+  })
+}
+
 // 复制内容
 const onCopy = (id: string) => {
   // 设置系统剪切板的内容
@@ -152,6 +169,21 @@ const onOrderConfirm = () => {
         const res = await putMemberOrderReceiptByIdAPI(query.id)
         // 更新订单状态
         order.value = res.result
+      }
+    },
+  })
+}
+
+// 删除订单
+const onOrderDelete = () => {
+  // 二次确认弹窗
+  uni.showModal({
+    content: '您确定要删除该订单？',
+    success: async (res) => {
+      if (res.confirm) {
+        await deleteMemberOrderAPI({ ids: [query.id] })
+        // 关闭当前页面，跳转到订单列表页
+        uni.redirectTo({ url: '/pagesOrder/list/list' })
       }
     },
   })
@@ -313,7 +345,11 @@ const onOrderConfirm = () => {
           <!-- 待评价状态：展示去评价 -->
           <view class="button" v-if="order?.orderState === OrderState.DaiPingJia"> 去评价 </view>
           <!-- 待评价/已完成/已取消 状态: 展示删除订单 -->
-          <view class="button delete" v-if="order?.orderState >= OrderState.DaiPingJia">
+          <view
+            class="button delete"
+            @tap="onOrderDelete"
+            v-if="order?.orderState >= OrderState.DaiPingJia"
+          >
             删除订单
           </view>
         </template>
@@ -337,7 +373,7 @@ const onOrderConfirm = () => {
       </view>
       <view class="footer">
         <view class="button" @tap="popup?.close?.()">取消</view>
-        <view class="button primary">确认</view>
+        <view class="button primary" @tap="onOrderCancel">确认</view>
       </view>
     </view>
   </uni-popup>
